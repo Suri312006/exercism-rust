@@ -10,27 +10,14 @@ pub struct Clock {
 // the methods on the clock object
 impl Clock {
     pub fn new(hours: i32, minutes: i32) -> Self {
-        let mut start_minutes = minutes.clone();
-        let mut start_hours = hours.clone();
+        let (final_minutes, hour_overflow) = parse_minutes_hour_overflow(&minutes);
+        let total_hours = hours + hour_overflow;
 
-        // getting rid of the days
-        start_minutes = start_minutes % (60 * 24);
-
-        // hours to add to the hours
-        let add_hours = start_minutes / 60;
-        start_hours += add_hours;
-
-        // should be the final minutes value
-        start_minutes = start_minutes % 60;
-
-        // now to start working with the hours
-
-        // removes all "days in hours"
-        start_hours = start_hours % 24;
+        let final_hours = parse_hour(&total_hours);
 
         return Clock {
-            hours: start_hours,
-            minutes: start_minutes,
+            hours: final_hours,
+            minutes: final_minutes,
         };
         // todo!("Construct a new Clock from {hours} hours and {minutes} minutes");
     }
@@ -39,6 +26,34 @@ impl Clock {
         // we could be given any amount of minutes
         return Clock::new(self.hours, self.minutes + minutes);
     }
+}
+
+fn parse_hour(hours: &i32) -> i32 {
+    let hours = hours.clone();
+
+    if hours < 0 {
+        return 24 - hours.abs() % 24;
+    }
+    return hours % 24;
+}
+
+fn parse_minutes_hour_overflow(minutes: &i32) -> (i32, i32) {
+    let mut minutes = minutes.clone();
+
+    // getting rid of the days
+    minutes = minutes % (60 * 24);
+
+    // hours to add to the hours
+    let add_hours = minutes / 60;
+
+    // should be the final minutes value
+    minutes = minutes % 60;
+
+    if minutes < 0{
+        return(60-minutes.abs(), add_hours -1);
+    }
+
+    return (minutes, add_hours);
 }
 
 //NOTE: prints out clock?
